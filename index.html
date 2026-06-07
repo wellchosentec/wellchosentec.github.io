@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>廠務與巡檢管理系統</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-6 rounded-2xl shadow-md w-full max-w-md">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">
+            📋 現場即時通報系統
+        </h2>
+        
+        <form id="notifyForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">通報來源 / 設備名稱</label>
+                <input type="text" id="source" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-50" value="QR碼現場巡檢">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">警報等級</label>
+                <select id="level" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-50">
+                    <option value="INFO">🟢 一般簽到 (INFO)</option>
+                    <option value="WARNING">🟡 注意事項 (WARNING)</option>
+                    <option value="CRITICAL">🔴 緊急異常 (CRITICAL)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">通報主旨</label>
+                <input type="text" id="title" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-50" placeholder="例如：設備運轉異音">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">詳細說明說明</label>
+                <textarea id="content" rows="3" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-50" placeholder="請描述現場狀況..."></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md transition duration-200">
+                送出通報 (觸發 Mail & LINE)
+            </button>
+        </form>
+        
+        <div id="statusMessage" class="mt-4 text-center text-sm font-semibold hidden"></div>
+    </div>
+
+    <script>
+        // 後端擴充介面：請替換成您的 Google Apps Script 部署網址
+        const BACKEND_API = "https://script.google.com/macros/s/XXXXX/exec";
+
+        document.getElementById('notifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const statusMsg = document.getElementById('statusMessage');
+            
+            // 鎖定按鈕防止重複點擊
+            submitBtn.disabled = true;
+            submitBtn.innerText = "處理中...";
+            
+            // 封裝標準化資料包 (與先前架構相同，具備擴充性)
+            const payload = {
+                source: document.getElementById('source').value,
+                level: document.getElementById('level').value,
+                title: document.getElementById('title').value,
+                content: document.getElementById('content').value,
+                timestamp: new Date().toLocaleString()
+            };
+
+            try {
+                // 發送至後端
+                const response = await fetch(BACKEND_API, {
+                    method: 'POST',
+                    mode: 'no-cors', // 配合 GAS 的跨域特性
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                statusMsg.className = "mt-4 text-center text-sm font-semibold text-green-600";
+                statusMsg.innerText = "✅ 通報成功！已發送 Mail 與 LINE 通知。";
+                statusMsg.classList.remove('hidden');
+                document.getElementById('notifyForm').reset();
+            } catch (error) {
+                statusMsg.className = "mt-4 text-center text-sm font-semibold text-red-600";
+                statusMsg.innerText = "❌ 發送失敗，請檢查網路連線。";
+                statusMsg.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "送出通報 (觸發 Mail & LINE)";
+            }
+        });
+    </script>
+</body>
+</html>
