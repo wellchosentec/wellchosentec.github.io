@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>歡迎光臨（需要密碼）</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 100px; }
+        #secret-content { display: none; } /* 預設隱藏隱密內容 */
+    </style>
+</head>
+<body>
+
+    <div id="login-box">
+        <h2>請輸入密碼以進入網頁</h2>
+        <input type="password" id="password" placeholder="請輸入密碼">
+        <button onclick="checkPassword()">登入</button>
+        <p id="error-msg" style="color: red;"></p>
+    </div>
+
+    <div id="secret-content">
+        <h1>🎉 恭喜登入成功！</h1>
+        <p>這是只有知道密碼的人才能看到的秘密內容。</p>
+    </div>
+
+    <script>
+        function checkPassword() {
+            const input = document.getElementById('password').value;
+            // 這裡設定你的密碼（注意：別人看網頁原始碼就能看到這個密碼）
+            const correctPassword = "mySecretPassword123"; 
+
+            if (input === correctPassword) {
+                document.getElementById('login-box').style.display = 'none';
+                document.getElementById('secret-content').style.display = 'block';
+            } else {
+                document.getElementById('error-msg').innerText = "密碼錯誤，請再試一次！";
+            }
+        }
+    </script>
+</body>
+</html>
